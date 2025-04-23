@@ -104,12 +104,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\darks\Downloads\SFML-2.6.2-windows-vc17-64-bit\SFML-2.6.2\include;C:\Projects\Galaga\Galaga;C:\SFML-2.6.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\SFML-2.6.2\include;C:\Users\darks\Downloads\SFML-2.6.2-windows-vc17-64-bit\SFML-2.6.2\include;C:\Projects\Galaga\Galaga;C:\SFML-2.6.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\darks\Downloads\SFML-2.6.2-windows-vc17-64-bit\SFML-2.6.2\lib;C:\SFML-2.6.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\SFML-2.6.2\lib;C:\Users\darks\Downloads\SFML-2.6.2-windows-vc17-64-bit\SFML-2.6.2\lib;C:\SFML-2.6.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
