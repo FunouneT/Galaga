@@ -17,7 +17,8 @@ int main()
     {
         float time = clock.getElapsedTime().asMicroseconds();
         clock.restart();
-        time /= 300;
+        //Изменил :D
+        time /= 500;
 
         sf::Event event;
         while (window.pollEvent(event))
