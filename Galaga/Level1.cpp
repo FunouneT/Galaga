@@ -11,6 +11,7 @@ Level1::Level1()
 	//entities.push_back(new Player(textures::texture, sf::Vector2f(100, WINDOWHEIGHT - 100), PLAYERSPEED));
 	textures::setTextures();
 	player = new Player(textures::playerTexture, sf::Vector2f(100, WINDOWHEIGHT - 100));
+	cooldown = 1;
 }
 
 void Level1::draw(sf::RenderWindow& window)
@@ -36,11 +37,11 @@ void Level1::update(float time)
 		player->update(PLAYERSPEED, time);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 	{
-		if (cooldown == 300) {
+		if (cooldown >= 300) {
 			Projectile* projectile = new Projectile(textures::projectileTexture, player->pos);
 			projectiles.push_back(projectile);
-			cooldown = 0;
+			cooldown = 1;
 		}
-		else cooldown++;
 	}
+	cooldown+=time;
 }
