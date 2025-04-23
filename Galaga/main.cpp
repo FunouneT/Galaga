@@ -1,8 +1,6 @@
 #include <SFML/Graphics.hpp>
-//#include "Player.h"
 #include "constants.h"
 #include "Level1.h"
-//#include <iostream>
 
 int main()
 {
