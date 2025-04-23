@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-const int WINDOWHEIGHT = 1000;
+const int WINDOWHEIGHT = 900;
 const int WINDOWWIDTH = 800;
 const float PLAYERSPEED = 0.1;
 const float PLAYERHEIGHT = 20;

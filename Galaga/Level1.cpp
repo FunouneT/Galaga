@@ -36,7 +36,7 @@ void Level1::update(float time)
 		player->update(PLAYERSPEED, time);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 	{
-		if (cooldown == 1000) {
+		if (cooldown == 300) {
 			Projectile* projectile = new Projectile(textures::projectileTexture, player->pos);
 			projectiles.push_back(projectile);
 			cooldown = 0;
