@@ -1,7 +1,5 @@
 #include "Entity.h"
 
-#include <SFML/Graphics.hpp>
-
 Entity::Entity(sf::Texture& texture, sf::Vector2f pos)
 {
 	//this->speed = speed;
@@ -32,6 +30,11 @@ void Entity::update()
 }
 
 void Entity::update(float time)
+{
+
+}
+
+void Entity::update(sf::Vector2f, float time)
 {
 
 }

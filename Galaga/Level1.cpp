@@ -1,10 +1,9 @@
-#include <SFML/Graphics.hpp>
 #include "Level1.h"
 #include "Player.h"
 #include "constants.h"
 #include "Textures.h"
 #include "Projectile.h"
-#include <iostream>
+//#include <iostream>
 
 Level1::Level1()
 {
@@ -25,11 +24,13 @@ void Level1::draw(sf::RenderWindow& window)
 
 void Level1::update(float time)
 {
-	std::cout << time << std::endl;
-	for (Entity* proj: projectiles)
+	//std::cout << time << std::endl;
+	//Обновление снарядов
+	for (Entity* proj : projectiles)
 	{
 		proj->update(time);
 	}
+	//Обновление/управление игрока
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 		player->update(-PLAYERSPEED, time);
 
@@ -43,5 +44,7 @@ void Level1::update(float time)
 			cooldown = 1;
 		}
 	}
+	//Обновление противников
+
 	cooldown+=time;
 }

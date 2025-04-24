@@ -26,6 +26,8 @@ public:
 
 	virtual void update(float);
 
+	virtual void update(sf::Vector2f, float);
+
 	virtual void update(float, float);
 
 	virtual ~Entity();
