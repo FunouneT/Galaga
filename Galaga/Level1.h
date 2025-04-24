@@ -11,10 +11,16 @@ public:
 	void update(float);
 
 	void draw(sf::RenderWindow&);
+	
+	int projectileCD;
 
-	int cooldown;
+	int enemySpawnCD;
+
+	int countOfEnemies;
 
 	Player* player;
 
 	std::list<Entity*> projectiles;
+
+	std::list<Entity*> enemies;
 };

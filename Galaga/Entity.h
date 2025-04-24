@@ -2,9 +2,13 @@
 
 #include <SFML/Graphics.hpp>
 
+enum class Direction { Left, Down, Right };
+
 class Entity
 {
 public:
+
+	Direction direction;
 
 	sf::Vector2f pos;
 
@@ -21,6 +25,8 @@ public:
 	sf::Sprite getSprite();
 
 	sf::Vector2f getPos();
+
+	bool collide(Entity&);
 
 	virtual void update();
 
