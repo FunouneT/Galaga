@@ -1,37 +1,64 @@
-#include <SFML/Graphics.hpp>
 #include "constants.h"
 #include "Level1.h"
-// Максим пидор :)
+#include "Menu.h"
 
-int main()
-{
-    sf::RenderWindow window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "Galaga game");
-    
-    sf::Clock clock;
+enum class GameState {
+    MENU,
+    LEVEL1 
+};
 
-    //textures::setTextures();
+int main() {
 
-    Level1 level1;
+    sf::RenderWindow window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "Galaga Game");
+    sf::Clock clock; 
 
-    while (window.isOpen())
-    {
-        float time = clock.getElapsedTime().asMicroseconds();
-        clock.restart();
-        time /= 300;
+    // Текущее состояние игры
+    GameState currentState = GameState::MENU;
 
+    // Игровые объекты
+    Menu mainMenu;
+    Level1* currentLevel = nullptr; 
+
+    // Главный игровой цикл
+    while (window.isOpen()) {
+        // Обработка событий
         sf::Event event;
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
+
+            // Передаем события в текущее состояние
+            if (currentState == GameState::MENU) {
+                mainMenu.handleEvent(event, window);
+            }
         }
 
-        level1.update(time);
+       
+        float frameTime = clock.restart().asMicroseconds() / 300.0f;
 
+        // Проверяем переход между состояниями
+        if (currentState == GameState::MENU && mainMenu.shouldStartGame()) {
+            currentState = GameState::LEVEL1;
+            currentLevel = new Level1();  // Создаем уровень при первом переходе
+        }
+
+     
         window.clear();
-        level1.draw(window);
+
+        // Рендерим текущее состояние
+        if (currentState == GameState::MENU) {
+            mainMenu.draw(window);
+        }
+        else if (currentState == GameState::LEVEL1) {
+            currentLevel->update(frameTime);
+            currentLevel->draw(window);
+        }
+
+ 
         window.display();
     }
 
+
+    delete currentLevel;
     return 0;
 }
