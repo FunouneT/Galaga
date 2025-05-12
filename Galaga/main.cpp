@@ -1,38 +1,64 @@
 #include "constants.h"
 #include "Level1.h"
+#include "Menu.h"
 
-int main()
-{
-    //Создаём окно
-    sf::RenderWindow window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "Galaga game");
-    //Создаём таймер
-    sf::Clock clock;
-    //Создаём уровень, первый
-    Level1 level1;
-    //Пока окно открыто
-    while (window.isOpen())
-    {
-        //Вот по этому пока не подскажу
-        float time = clock.getElapsedTime().asMicroseconds();
-        clock.restart();
-        time /= 300;
-        //Проверяем, нажат ли крестик закрытия окна
+enum class GameState {
+    MENU,
+    LEVEL1 
+};
+
+int main() {
+
+    sf::RenderWindow window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "Galaga Game");
+    sf::Clock clock; 
+
+    // Текущее состояние игры
+    GameState currentState = GameState::MENU;
+
+    // Игровые объекты
+    Menu mainMenu;
+    Level1* currentLevel = nullptr; 
+
+    // Главный игровой цикл
+    while (window.isOpen()) {
+        // Обработка событий
         sf::Event event;
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
-                //Если нажат, то закрываем окно, завершаем программу
                 window.close();
+
+            // Передаем события в текущее состояние
+            if (currentState == GameState::MENU) {
+                mainMenu.handleEvent(event, window);
+            }
         }
-        //Обновляем уровень
-        level1.update(time);
-        //Очищаем окно от предыдущего кадра
+
+       
+        float frameTime = clock.restart().asMicroseconds() / 300.0f;
+
+        // Проверяем переход между состояниями
+        if (currentState == GameState::MENU && mainMenu.shouldStartGame()) {
+            currentState = GameState::LEVEL1;
+            currentLevel = new Level1();  // Создаем уровень при первом переходе
+        }
+
+     
         window.clear();
-        //Отрисовываем уровень
-        level1.draw(window);
-        //Отображаем всё на окне
+
+        // Рендерим текущее состояние
+        if (currentState == GameState::MENU) {
+            mainMenu.draw(window);
+        }
+        else if (currentState == GameState::LEVEL1) {
+            currentLevel->update(frameTime);
+            currentLevel->draw(window);
+        }
+
+ 
         window.display();
     }
 
+
+    delete currentLevel;
     return 0;
 }
