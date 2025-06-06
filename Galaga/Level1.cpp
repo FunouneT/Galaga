@@ -1,46 +1,138 @@
-#include <SFML/Graphics.hpp>
 #include "Level1.h"
 #include "Player.h"
 #include "constants.h"
 #include "Textures.h"
 #include "Projectile.h"
+#include "Enemy.h"
 #include <iostream>
-
+//Конструктор класса
 Level1::Level1()
 {
-	//entities.push_back(new Player(textures::texture, sf::Vector2f(100, WINDOWHEIGHT - 100), PLAYERSPEED));
+	//Устанавливаем ВСЕ текстурки
 	textures::setTextures();
+	//Создаём динамически игрока
 	player = new Player(textures::playerTexture, sf::Vector2f(100, WINDOWHEIGHT - 100));
+	//Задаём начальное значение кулдаунов
+	projectileCD = 0;
+	enemySpawnCD = 0;
+	countOfEnemies = 0;
 }
-
+//--------------------------------------------------------------------------------------------
+//Метод отрисовки всего, что находится в игре
 void Level1::draw(sf::RenderWindow& window)
 {
+	//Отрисовываем игрока методом класса RenderWindow из SFML, получив спрайт игрока
 	window.draw(player->getSprite());
+	//Отрисовываем все снаряды
 	for (Entity* proj : projectiles)
 	{
 		window.draw(proj->getSprite());
 	}
+	//Отрисовываем всех врагов
+	for (Entity* enem : enemies)
+	{
+		window.draw(enem->getSprite());
+	}
 }
-
+//--------------------------------------------------------------------------------------------
+//Метод обновления всего, что находится в игре
 void Level1::update(float time)
 {
-	std::cout << time << std::endl;
-	for (Entity* proj: projectiles)
+	//--------------------------------------------------------------------------------------------
+	//Обновление снарядов
+	for (Entity* proj : projectiles)
 	{
 		proj->update(time);
 	}
+	//--------------------------------------------------------------------------------------------
+	//Обновление/управление игрока
+	//Если клавиша "стрелка влево" нажата, то обновляем игрока соответственно
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 		player->update(-PLAYERSPEED, time);
-
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 		player->update(PLAYERSPEED, time);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 	{
-		if (cooldown == 300) {
-			Projectile* projectile = new Projectile(textures::projectileTexture, player->pos);
+		//Если кулдаун "накопился достаточно", то позволяем создать снаряд
+		if (projectileCD >= 300) {
+			//Создаём динамически снаряд, передаём его текстурку и позицию игрока
+			Projectile* projectile = new Projectile(textures::projectileTexture, player->getPos());
+			//Записываем созданный объект в лист
 			projectiles.push_back(projectile);
-			cooldown = 0;
+			//Сбрасываем кулдаун (нужно будет переделать систему, т.к. возможно переполнение переменной)
+			projectileCD = 0;
 		}
-		else cooldown++;
 	}
+	//--------------------------------------------------------------------------------------------
+	//Создание противников
+	if (enemySpawnCD >= 2000 and countOfEnemies < 20) {
+		Enemy* enemy = new Enemy(textures::enemyTexture, sf::Vector2f(WINDOWWIDTH - 60, 40));
+		enemies.push_back(enemy);
+		enemy->direction = Direction::Left;
+		enemySpawnCD = 0;
+		countOfEnemies++;
+	}
+	//--------------------------------------------------------------------------------------------
+	//Обновление противников
+	//Проходимся по листу врагов
+	for (Entity* enem : enemies)
+	{
+		//Если левая граница преодолена, то
+		if (enem->getPos().x <= 0) {
+			//Меняем направление противника
+			enem->direction = Direction::Right;
+			//Толкаем вниз на следующую строку и чуть вправо, чтобы он ещё раз не ушёл вниз
+			enem->update(sf::Vector2f(0.05, 80 / time), time);
+		}
+		//Соответственно с правой границей, -60 - временная заглушка, чтобы текстура врага не уходила за экран
+		if (enem->getPos().x > WINDOWWIDTH - 60) {
+			enem->direction = Direction::Left;
+			enem->update(sf::Vector2f(-0.05, 80 / time), time);
+		}
+
+
+		//Двигаем врагов согласно направлению
+		if (enem->direction == Direction::Left)
+			enem->update(sf::Vector2f(-0.05, 0), time);
+		if (enem->direction == Direction::Right)
+			enem->update(sf::Vector2f(0.05, 0), time);
+	}
+	//--------------------------------------------------------------------------------------------
+	//Коллизия снарядов и противников
+	//Если листы снарядов и врагов не пустые, то
+	if (!projectiles.empty() and !enemies.empty()) {
+		//Проходимся по листу врагов, i - итератор листа
+		for (auto i = enemies.begin(); i != enemies.end();)
+		{
+			bool enemyIsDead = false;
+			//Объявляем указатель на врага, чтобы с ним работать
+			Entity* enem = *i;
+			//Проходимся по листу снарядов, j - итератор листа
+			for (auto j = projectiles.begin(); j != projectiles.end();)
+			{
+				//Объявляем указатель на снаряд, чтобы с ним работать
+				Entity* proj = *j;
+				//Если есть коллизия врага и снаряда
+				if (enem->collide(*proj)) {
+					//Удаляем из списка соприкоснувшиеся элементы
+					//И записываем в i и j элементы, следующие за удалёнными
+					i = enemies.erase(i);
+					j = projectiles.erase(j);
+					//Вызываем соответствующие деструкторы
+					enem->~Entity();
+					proj->~Entity();
+					enemyIsDead = true;
+					break;
+				}
+				//Если коллизии не было, то идём дальше по листу
+				else j++;
+			}
+			//Если коллизии не было, то идём дальше по листу
+			if (!enemyIsDead) i++;
+		}
+	}
+	//--------------------------------------------------------------------------------------------
+	//Обновление кулдаунов
+	projectileCD += time;
+	enemySpawnCD += time;
 }
