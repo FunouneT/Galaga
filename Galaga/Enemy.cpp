@@ -4,7 +4,7 @@
 Enemy::Enemy(sf::Texture& texture, sf::Vector2f pos) : Entity(texture, pos)
 {
 	sprite.setScale(ENEMYSPRITESCALE, ENEMYSPRITESCALE);
-	//direction = Direction::Left;
+	state = State::Idle;
 }
 
 void Enemy::update(sf::Vector2f newPos, float time)

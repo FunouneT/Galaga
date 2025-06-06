@@ -10,8 +10,8 @@ namespace textures {
 
     static void setTextures() {
         //Загружаем текстуры из файла
-        playerTexture.loadFromFile("./Assets/player.png");
-        projectileTexture.loadFromFile("./Assets/projectile.png");
-        enemyTexture.loadFromFile("./Assets/enemy.png");
+        playerTexture.loadFromFile("./Assets/textures/player.png");
+        projectileTexture.loadFromFile("./Assets/textures/projectile.png");
+        enemyTexture.loadFromFile("./Assets/textures/enemy.png");
     }
 }
