@@ -47,14 +47,19 @@ void Level1::update(float time)
 	//--------------------------------------------------------------------------------------------
 	//Обновление/управление игрока
 	//Если клавиша "стрелка влево" нажата, то обновляем игрока соответственно
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+		player->state = State::Sprint;
+	else
+		player->state = State::Idle;
+	//std::cout << (player->state == State::Idle ? 0 : 1) << std::endl;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-		player->update(-PLAYERSPEED, time);
+		player->update((player->state == State::Sprint ? -PLAYERSPEED * 1.5 : -PLAYERSPEED), time);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-		player->update(PLAYERSPEED, time);
+		player->update((player->state == State::Sprint ? PLAYERSPEED * 1.5 : PLAYERSPEED), time);
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 	{
 		//Если кулдаун "накопился достаточно", то позволяем создать снаряд
-		if (projectileCD >= 300) {
+		if (projectileCD >= PROJCD) {
 			//Создаём динамически снаряд, передаём его текстурку и позицию игрока
 			Projectile* projectile = new Projectile(textures::projectileTexture, player->getPos());
 			//Записываем созданный объект в лист
@@ -65,7 +70,7 @@ void Level1::update(float time)
 	}
 	//--------------------------------------------------------------------------------------------
 	//Создание противников
-	if (enemySpawnCD >= 2000 and countOfEnemies < 20) {
+	if (enemySpawnCD >= ENEMSPAWNCD and countOfEnemies < 20) {
 		Enemy* enemy = new Enemy(textures::enemyTexture, sf::Vector2f(WINDOWWIDTH - 60, 40));
 		enemies.push_back(enemy);
 		enemy->direction = Direction::Left;
@@ -77,25 +82,32 @@ void Level1::update(float time)
 	//Проходимся по листу врагов
 	for (Entity* enem : enemies)
 	{
-		//Если левая граница преодолена, то
-		if (enem->getPos().x <= 0) {
-			//Меняем направление противника
-			enem->direction = Direction::Right;
-			//Толкаем вниз на следующую строку и чуть вправо, чтобы он ещё раз не ушёл вниз
-			enem->update(sf::Vector2f(0.05, 80 / time), time);
-		}
-		//Соответственно с правой границей, -60 - временная заглушка, чтобы текстура врага не уходила за экран
-		if (enem->getPos().x > WINDOWWIDTH - 60) {
-			enem->direction = Direction::Left;
-			enem->update(sf::Vector2f(-0.05, 80 / time), time);
-		}
+		if (rand() % 3000 == 1)
+			enem->state = State::Sprint;
+		if (enem->state == State::Idle) {
+			//Если левая граница преодолена, то
+			if (enem->getPos().x <= 0) {
+				//Меняем направление противника
+				enem->direction = Direction::Right;
+				//Толкаем вниз на следующую строку и чуть вправо, чтобы он ещё раз не ушёл вниз
+				enem->update(sf::Vector2f(0.05, 80 / time), time);
+			}
+			//Соответственно с правой границей, -60 - временная заглушка, чтобы текстура врага не уходила за экран
+			if (enem->getPos().x > WINDOWWIDTH - 60) {
+				enem->direction = Direction::Left;
+				enem->update(sf::Vector2f(-0.05, 80 / time), time);
+			}
 
 
-		//Двигаем врагов согласно направлению
-		if (enem->direction == Direction::Left)
-			enem->update(sf::Vector2f(-0.05, 0), time);
-		if (enem->direction == Direction::Right)
-			enem->update(sf::Vector2f(0.05, 0), time);
+			//Двигаем врагов согласно направлению
+			if (enem->direction == Direction::Left)
+				enem->update(sf::Vector2f(-ENEMYSPEED, 0), time);
+			if (enem->direction == Direction::Right)
+				enem->update(sf::Vector2f(ENEMYSPEED, 0), time);
+		}
+		else {
+			enem->update(sf::Vector2f(0, ENEMYSPEED * 1.5), time);
+		}
 	}
 	//--------------------------------------------------------------------------------------------
 	//Коллизия снарядов и противников

@@ -2,6 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 
+enum class State { Idle, Sprint };
+
 enum class Direction { Left, Down, Right };
 
 class Entity
@@ -9,6 +11,8 @@ class Entity
 public:
 
 	Direction direction;
+
+	State state;
 
 	sf::Vector2f pos;
 

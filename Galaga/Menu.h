@@ -4,7 +4,7 @@
 
 class Menu {
 public:
-    Menu();
+    Menu(sf::Font font);
 
     void handleEvent(const sf::Event& event, const sf::RenderWindow& window);
 

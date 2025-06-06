@@ -1,12 +1,12 @@
 #include "Menu.h"
 #include <iostream>
 
-Menu::Menu() : startGameTriggered(false) {
-    if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
-        std::cerr << "Error loading font. Using default SFML font.\n";
+Menu::Menu(sf::Font font) : startGameTriggered(false) {
+    //if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
+    //    std::cerr << "Error loading font. Using default SFML font.\n";
         // В случае ошибки SFML будет использовать встроенный шрифт
-    }
-
+    //}
+    this->font = font;
     createBackground();
     createTitle();
     createButtons();
