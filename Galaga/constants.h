@@ -1,6 +1,6 @@
 #pragma once
 
-const int FPS_LIMIT = 120;
+const int FPS_LIMIT = 130;
 const int WINDOWHEIGHT = 900;
 const int WINDOWWIDTH = 800;
 const float PLAYERSPEED = 0.1;
