@@ -1,26 +1,29 @@
 #pragma once
 #include <list>
 #include "Player.h"
+#include <SFML/Graphics.hpp>
 
 class Level1
 {
 public:
-	
-	Level1();
+    Level1();
+    ~Level1();
 
-	void update(float);
+    void update(float);
+    void draw(sf::RenderWindow&);
 
-	void draw(sf::RenderWindow&);
-	
-	int projectileCD;
+    int projectileCD;
+    int enemySpawnCD;
+    int countOfEnemies;
+    int enemiesKilled;
 
-	int enemySpawnCD;
+    Player* player;
+    std::list<Entity*> projectiles;
+    std::list<Entity*> enemies;
 
-	int countOfEnemies;
+    sf::Text killsText;
+    void setupKillsCounter(sf::Font& font);
 
-	Player* player;
-
-	std::list<Entity*> projectiles;
-
-	std::list<Entity*> enemies;
+    bool isGameOver;
+    float gameOverLineY;
 };
