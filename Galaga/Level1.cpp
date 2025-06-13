@@ -5,146 +5,141 @@
 #include "Projectile.h"
 #include "Enemy.h"
 #include <iostream>
-//Конструктор класса
+
 Level1::Level1()
 {
-	//Устанавливаем ВСЕ текстурки
-	textures::setTextures();
-	//Создаём динамически игрока
-	player = new Player(textures::playerTexture, sf::Vector2f(100, WINDOWHEIGHT - 100));
-	//Задаём начальное значение кулдаунов
-	projectileCD = 0;
-	enemySpawnCD = 0;
-	countOfEnemies = 0;
+    textures::setTextures();
+    player = new Player(textures::playerTexture, sf::Vector2f(100, WINDOWHEIGHT - 100));
+    projectileCD = 0;
+    enemySpawnCD = 0;
+    countOfEnemies = 0;
+    enemiesKilled = 0;
+    isGameOver = false;
+    gameOverLineY = WINDOWHEIGHT - 150;  // Линия поражения
 }
-//--------------------------------------------------------------------------------------------
-//Метод отрисовки всего, что находится в игре
+
+Level1::~Level1()
+{
+    delete player;
+    for (auto proj : projectiles) delete proj;
+    for (auto enem : enemies) delete enem;
+}
+
+void Level1::setupKillsCounter(sf::Font& font)
+{
+    killsText.setFont(font);
+    killsText.setCharacterSize(24);
+    killsText.setFillColor(sf::Color::White);
+    killsText.setPosition(10, 10);
+    killsText.setString("Kills: 0");
+}
+
 void Level1::draw(sf::RenderWindow& window)
 {
-	//Отрисовываем игрока методом класса RenderWindow из SFML, получив спрайт игрока
-	window.draw(player->getSprite());
-	//Отрисовываем все снаряды
-	for (Entity* proj : projectiles)
-	{
-		window.draw(proj->getSprite());
-	}
-	//Отрисовываем всех врагов
-	for (Entity* enem : enemies)
-	{
-		window.draw(enem->getSprite());
-	}
+    window.draw(player->getSprite());
+    for (Entity* proj : projectiles) window.draw(proj->getSprite());
+    for (Entity* enem : enemies) window.draw(enem->getSprite());
+
+    window.draw(killsText);
+
+    sf::Vertex line[] = {
+        sf::Vertex(sf::Vector2f(0, gameOverLineY), sf::Color::Red),
+        sf::Vertex(sf::Vector2f(WINDOWWIDTH, gameOverLineY), sf::Color::Red)
+    };
+    window.draw(line, 2, sf::Lines);
 }
-//--------------------------------------------------------------------------------------------
-//Метод обновления всего, что находится в игре
+
 void Level1::update(float time)
 {
-	//--------------------------------------------------------------------------------------------
-	//Обновление снарядов
-	for (Entity* proj : projectiles)
-	{
-		proj->update(time);
-	}
-	//--------------------------------------------------------------------------------------------
-	//Обновление/управление игрока
-	//Если клавиша "стрелка влево" нажата, то обновляем игрока соответственно
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-		player->state = State::Sprint;
-	else
-		player->state = State::Idle;
-	//std::cout << (player->state == State::Idle ? 0 : 1) << std::endl;
-	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) && (player->getPos().x >= 0))
-		player->update((player->state == State::Sprint ? -PLAYERSPEED * 1.5 : -PLAYERSPEED), time);
-	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (player->getPos().x <= WINDOWWIDTH - 70))
-		player->update((player->state == State::Sprint ? PLAYERSPEED * 1.5 : PLAYERSPEED), time);
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-	{
-		//Если кулдаун "накопился достаточно", то позволяем создать снаряд
-		if (projectileCD >= PROJCD) {
-			//Создаём динамически снаряд, передаём его текстурку и позицию игрока
-			Projectile* projectile = new Projectile(textures::projectileTexture, player->getPos());
-			//Записываем созданный объект в лист
-			projectiles.push_back(projectile);
-			//Сбрасываем кулдаун (нужно будет переделать систему, т.к. возможно переполнение переменной)
-			projectileCD = 0;
-		}
-	}
-	//--------------------------------------------------------------------------------------------
-	//Создание противников
-	if (enemySpawnCD >= ENEMSPAWNCD and countOfEnemies < 20) {
-		Enemy* enemy = new Enemy(textures::enemyTexture, sf::Vector2f(WINDOWWIDTH - 60, 40));
-		enemies.push_back(enemy);
-		enemy->direction = Direction::Left;
-		enemySpawnCD = 0;
-		countOfEnemies++;
-	}
-	//--------------------------------------------------------------------------------------------
-	//Обновление противников
-	//Проходимся по листу врагов
-	for (Entity* enem : enemies)
-	{
-		if (rand() % 3000 == 1)
-			enem->state = State::Sprint;
-		if (enem->state == State::Idle) {
-			//Если левая граница преодолена, то
-			if (enem->getPos().x <= 0) {
-				//Меняем направление противника
-				enem->direction = Direction::Right;
-				//Толкаем вниз на следующую строку и чуть вправо, чтобы он ещё раз не ушёл вниз
-				enem->update(sf::Vector2f(0.05, 80 / time), time);
-			}
-			//Соответственно с правой границей, -60 - временная заглушка, чтобы текстура врага не уходила за экран
-			if (enem->getPos().x > WINDOWWIDTH - 60) {
-				enem->direction = Direction::Left;
-				enem->update(sf::Vector2f(-0.05, 80 / time), time);
-			}
+    if (isGameOver) return;  // Если игра окончена, не обновляем состояние
 
+    // Обновление снарядов
+    for (Entity* proj : projectiles) proj->update(time);
 
-			//Двигаем врагов согласно направлению
-			if (enem->direction == Direction::Left)
-				enem->update(sf::Vector2f(-ENEMYSPEED, 0), time);
-			if (enem->direction == Direction::Right)
-				enem->update(sf::Vector2f(ENEMYSPEED, 0), time);
-		}
-		else {
-			enem->update(sf::Vector2f(0, ENEMYSPEED * 1.5), time);
-		}
-	}
-	//--------------------------------------------------------------------------------------------
-	//Коллизия снарядов и противников
-	//Если листы снарядов и врагов не пустые, то
-	if (!projectiles.empty() and !enemies.empty()) {
-		//Проходимся по листу врагов, i - итератор листа
-		for (auto i = enemies.begin(); i != enemies.end();)
-		{
-			bool enemyIsDead = false;
-			//Объявляем указатель на врага, чтобы с ним работать
-			Entity* enem = *i;
-			//Проходимся по листу снарядов, j - итератор листа
-			for (auto j = projectiles.begin(); j != projectiles.end();)
-			{
-				//Объявляем указатель на снаряд, чтобы с ним работать
-				Entity* proj = *j;
-				//Если есть коллизия врага и снаряда
-				if (enem->collide(*proj)) {
-					//Удаляем из списка соприкоснувшиеся элементы
-					//И записываем в i и j элементы, следующие за удалёнными
-					i = enemies.erase(i);
-					j = projectiles.erase(j);
-					//Вызываем соответствующие деструкторы
-					enem->~Entity();
-					proj->~Entity();
-					enemyIsDead = true;
-					break;
-				}
-				//Если коллизии не было, то идём дальше по листу
-				else j++;
-			}
-			//Если коллизии не было, то идём дальше по листу
-			if (!enemyIsDead) i++;
-		}
-	}
-	//--------------------------------------------------------------------------------------------
-	//Обновление кулдаунов
-	projectileCD += time;
-	enemySpawnCD += time;
+    // Управление игроком
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+        player->state = State::Sprint;
+    else
+        player->state = State::Idle;
+
+    if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) && (player->getPos().x >= 0))
+        player->update((player->state == State::Sprint ? -PLAYERSPEED * 1.5 : -PLAYERSPEED), time);
+    if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (player->getPos().x <= WINDOWWIDTH - 70))
+        player->update((player->state == State::Sprint ? PLAYERSPEED * 1.5 : PLAYERSPEED), time);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+    {
+        if (projectileCD >= PROJCD) {
+            Projectile* projectile = new Projectile(textures::projectileTexture, player->getPos());
+            projectiles.push_back(projectile);
+            projectileCD = 0;
+        }
+    }
+
+    // Создание противников
+    if (enemySpawnCD >= ENEMSPAWNCD && countOfEnemies < 20) {
+        Enemy* enemy = new Enemy(textures::enemyTexture, sf::Vector2f(WINDOWWIDTH - 60, 40));
+        enemies.push_back(enemy);
+        enemy->direction = Direction::Left;
+        enemySpawnCD = 0;
+        countOfEnemies++;
+    }
+
+    // Обновление противников
+    for (Entity* enem : enemies)
+    {
+        if (rand() % 3000 == 1)
+            enem->state = State::Sprint;
+        if (enem->state == State::Idle) {
+            if (enem->getPos().x <= 0) {
+                enem->direction = Direction::Right;
+                enem->update(sf::Vector2f(0.05, 80 / time), time);
+            }
+            if (enem->getPos().x > WINDOWWIDTH - 60) {
+                enem->direction = Direction::Left;
+                enem->update(sf::Vector2f(-0.05, 80 / time), time);
+            }
+
+            if (enem->direction == Direction::Left)
+                enem->update(sf::Vector2f(-ENEMYSPEED, 0), time);
+            if (enem->direction == Direction::Right)
+                enem->update(sf::Vector2f(ENEMYSPEED, 0), time);
+        }
+        else {
+            enem->update(sf::Vector2f(0, ENEMYSPEED * 1.5), time);
+
+            // Проверка перехода линии
+            if (enem->getPos().y > gameOverLineY) {
+                isGameOver = true;
+            }
+        }
+    }
+
+    // Коллизия снарядов и противников
+    if (!projectiles.empty() && !enemies.empty()) {
+        for (auto i = enemies.begin(); i != enemies.end();)
+        {
+            bool enemyIsDead = false;
+            Entity* enem = *i;
+            for (auto j = projectiles.begin(); j != projectiles.end();)
+            {
+                Entity* proj = *j;
+                if (enem->collide(*proj)) {
+                    i = enemies.erase(i);
+                    j = projectiles.erase(j);
+                    delete enem;
+                    delete proj;
+                    enemyIsDead = true;
+                    enemiesKilled++;
+                    killsText.setString("Kills: " + std::to_string(enemiesKilled));
+                    break;
+                }
+                else j++;
+            }
+            if (!enemyIsDead) i++;
+        }
+    }
+
+    // Обновление кулдаунов
+    projectileCD += time;
+    enemySpawnCD += time;
 }

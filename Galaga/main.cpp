@@ -2,42 +2,41 @@
 #include "Level1.h"
 #include "Menu.h"
 #include "Fonts.h"
+#include "GameOverScreen.h"
+#include "PauseMenuScreen.h"
 #include <iostream>
 
 enum class GameState {
     MENU,
-    LEVEL1 
+    LEVEL1,
+    GAME_OVER,
+    PAUSED
 };
 
 int main() {
-
     sf::RenderWindow window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "Galaga Game");
-    sf::Clock clock; 
+    sf::Clock clock;
     float time;
     fonts::setFonts();
 
-    // Текущее состояние игры
     GameState currentState = GameState::MENU;
-
-    // Игровые объекты
     Menu mainMenu(fonts::font);
-    Level1* currentLevel = nullptr; 
+    Level1* currentLevel = nullptr;
+    GameOverScreen gameOverScreen(fonts::font);
+    PauseMenuScreen pauseMenuScreen(fonts::font);
+
     sf::Text fpsIndicator;
     fpsIndicator.setFont(fonts::font);
     fpsIndicator.setCharacterSize(20);
     fpsIndicator.setPosition(sf::Vector2f(WINDOWWIDTH - 50, 0));
 
-
-    // Главный игровой цикл
     while (window.isOpen()) {
-        // Обработка событий
-
         time = clock.restart().asSeconds();
 
         while (1 / time > FPS_LIMIT) {
             time = clock.getElapsedTime().asSeconds();
         }
-        //std::cout << int(1 / time) << std::endl;
+
         fpsIndicator.setString(std::to_string(int(1 / time)));
 
         sf::Event event;
@@ -45,38 +44,71 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            // Передаем события в текущее состояние
-            if (currentState == GameState::MENU) {
+            switch (currentState) {
+            case GameState::MENU:
                 mainMenu.handleEvent(event, window);
+                break;
+            case GameState::GAME_OVER:
+                gameOverScreen.handleEvent(event, window, window);
+                break;
+            case GameState::LEVEL1:
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+                    currentState = GameState::PAUSED;
+                }
+                break;
+            case GameState::PAUSED:
+                pauseMenuScreen.handleEvent(event, window);
+                if (pauseMenuScreen.shouldResume()) {
+                    currentState = GameState::LEVEL1;
+                    pauseMenuScreen.reset();
+                }
+                break;
             }
         }
 
-       
-        //float frameTime = clock.restart().asMicroseconds() / 300.0f;
-
-        // Проверяем переход между состояниями
         if (currentState == GameState::MENU && mainMenu.shouldStartGame()) {
             currentState = GameState::LEVEL1;
-            currentLevel = new Level1();  // Создаем уровень при первом переходе
+            currentLevel = new Level1();
+            currentLevel->setupKillsCounter(fonts::font);
         }
 
-     
+        if (currentState == GameState::LEVEL1 && currentLevel->isGameOver) {
+            currentState = GameState::GAME_OVER;
+        }
+
+        if (currentState == GameState::GAME_OVER) {
+            if (gameOverScreen.shouldRestart()) {
+                delete currentLevel;
+                currentLevel = new Level1();
+                currentLevel->setupKillsCounter(fonts::font);
+                currentState = GameState::LEVEL1;
+                gameOverScreen.reset();
+            }
+        }
+
         window.clear();
 
-        // Рендерим текущее состояние
-        if (currentState == GameState::MENU) {
+        switch (currentState) {
+        case GameState::MENU:
             mainMenu.draw(window);
-        }
-        else if (currentState == GameState::LEVEL1) {
+            break;
+        case GameState::LEVEL1:
             currentLevel->update(time * 2000);
             currentLevel->draw(window);
+            break;
+        case GameState::GAME_OVER:
+            currentLevel->draw(window);
+            gameOverScreen.draw(window, currentLevel->enemiesKilled);
+            break;
+        case GameState::PAUSED:
+            currentLevel->draw(window);
+            pauseMenuScreen.draw(window);
+            break;
         }
 
         window.draw(fpsIndicator);
- 
         window.display();
     }
-
 
     delete currentLevel;
     return 0;

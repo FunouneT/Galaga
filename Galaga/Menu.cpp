@@ -1,36 +1,30 @@
 #include "Menu.h"
-#include <iostream>
 
-Menu::Menu(sf::Font font) : startGameTriggered(false) {
-    //if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
-    //    std::cerr << "Error loading font. Using default SFML font.\n";
-        // В случае ошибки SFML будет использовать встроенный шрифт
-    //}
-    this->font = font;
+Menu::Menu(sf::Font& font) :
+    font(font),
+    startGameTriggered(false),
+    showAbout(false)
+{
     createBackground();
     createTitle();
     createButtons();
+    createAboutText();
 }
 
-// Создание градиентного фона
 void Menu::createBackground() {
-
     background.setPrimitiveType(sf::Quads);
     background.resize(4);
 
+    background[0].position = { 0, 0 };
+    background[1].position = { WINDOWWIDTH, 0 };
+    background[2].position = { WINDOWWIDTH, WINDOWHEIGHT };
+    background[3].position = { 0, WINDOWHEIGHT };
 
-    background[0].position = { 0, 0 };                   
-    background[1].position = { WINDOWWIDTH, 0 };        
-    background[2].position = { WINDOWWIDTH, WINDOWHEIGHT }; 
-    background[3].position = { 0, WINDOWHEIGHT };      
-
-    // Настраиваем цвета для градиента (синий -> фиолетовый)
-    background[0].color = sf::Color(0, 0, 139);    // Темно-синий
+    background[0].color = sf::Color(0, 0, 139);
     background[1].color = sf::Color(0, 0, 139);
-    background[2].color = sf::Color(128, 0, 128);  // Фиолетовый
+    background[2].color = sf::Color(128, 0, 128);
     background[3].color = sf::Color(128, 0, 128);
 }
-
 
 void Menu::createTitle() {
     title.setFont(font);
@@ -39,85 +33,124 @@ void Menu::createTitle() {
     title.setFillColor(sf::Color::White);
     title.setStyle(sf::Text::Bold);
 
- 
     sf::FloatRect bounds = title.getLocalBounds();
     title.setOrigin(bounds.width / 2, bounds.height / 2);
     title.setPosition(WINDOWWIDTH / 2, 150);
 }
 
-// Создание кнопок меню
 void Menu::createButtons() {
     startButton.setFont(font);
     startButton.setString("Start Game");
-    startButton.setCharacterSize(40);
+    startButton.setCharacterSize(50);
     startButton.setFillColor(sf::Color::White);
 
     sf::FloatRect bounds = startButton.getLocalBounds();
     startButton.setOrigin(bounds.width / 2, bounds.height / 2);
-    startButton.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2);
+    startButton.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2 - 50);
 
-    // Кнопка "About Game"
     aboutButton.setFont(font);
     aboutButton.setString("About Game");
-    aboutButton.setCharacterSize(40);
+    aboutButton.setCharacterSize(50);
     aboutButton.setFillColor(sf::Color::White);
-
 
     bounds = aboutButton.getLocalBounds();
     aboutButton.setOrigin(bounds.width / 2, bounds.height / 2);
-    aboutButton.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2 + 80);
+    aboutButton.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2 + 50);
 }
 
-// Обработка событий меню
+void Menu::createAboutText() {
+    aboutBackground.setSize(sf::Vector2f(600, 400));
+    aboutBackground.setFillColor(sf::Color(0, 0, 50, 220));
+    aboutBackground.setOutlineThickness(2);
+    aboutBackground.setOutlineColor(sf::Color::White);
+    aboutBackground.setOrigin(300, 200);
+    aboutBackground.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2);
+
+    aboutText.setFont(font);
+    aboutText.setString(
+        "This game was made for the defense\n"
+        "of \"Technological (design-technical)\" practice.\n\n"
+        "Created by:\n"
+        "1. Zviryansky Danil\n"
+        "2. Matrekhin Vladislav\n"
+        "3. Strelkin Maxim"
+    );
+    aboutText.setCharacterSize(24);
+    aboutText.setFillColor(sf::Color::White);
+    aboutText.setLineSpacing(1.5f);
+
+    sf::FloatRect bounds = aboutText.getLocalBounds();
+    aboutText.setOrigin(bounds.width / 2, bounds.height / 2);
+    aboutText.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2);
+}
+
 void Menu::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
     if (event.type == sf::Event::MouseMoved) {
-        // Преобразуем координаты мыши
-        sf::Vector2f mousePos = window.mapPixelToCoords(
-            { event.mouseMove.x, event.mouseMove.y });
+        sf::Vector2f mousePos = window.mapPixelToCoords({ event.mouseMove.x, event.mouseMove.y });
         checkHover(mousePos);
     }
     else if (event.type == sf::Event::MouseButtonPressed) {
-        sf::Vector2f mousePos = window.mapPixelToCoords(
-            { event.mouseButton.x, event.mouseButton.y });
+        sf::Vector2f mousePos = window.mapPixelToCoords({ event.mouseButton.x, event.mouseButton.y });
         checkClick(mousePos);
+    }
+    else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+        showAbout = false;
     }
 }
 
-// Проверка наведения на кнопки
 void Menu::checkHover(const sf::Vector2f& mousePos) {
-    bool startHover = startButton.getGlobalBounds().contains(mousePos);
-    bool aboutHover = aboutButton.getGlobalBounds().contains(mousePos);
+    if (startButton.getGlobalBounds().contains(mousePos)) {
+        startButton.setScale(1.1f, 1.1f);
+        startButton.setFillColor(sf::Color(200, 255, 200));
+    }
+    else {
+        startButton.setScale(1.0f, 1.0f);
+        startButton.setFillColor(sf::Color::White);
+    }
 
-    // Эффект при наведении: увеличение и подсветка
-    startButton.setScale(startHover ? 1.1f : 1.0f, // использую с f, чтобы С++ точно понял float
-        startHover ? 1.1f : 1.0f);
-    startButton.setFillColor(startHover ? sf::Color(200, 200, 255) : sf::Color::White);
-
-    aboutButton.setScale(aboutHover ? 1.1f : 1.0f,
-        aboutHover ? 1.1f : 1.0f);
-    aboutButton.setFillColor(aboutHover ? sf::Color(200, 200, 255) : sf::Color::White);
+    if (aboutButton.getGlobalBounds().contains(mousePos)) {
+        aboutButton.setScale(1.1f, 1.1f);
+        aboutButton.setFillColor(sf::Color(200, 200, 255));
+    }
+    else {
+        aboutButton.setScale(1.0f, 1.0f);
+        aboutButton.setFillColor(sf::Color::White);
+    }
 }
 
-// Обработка кликов по кнопкам
 void Menu::checkClick(const sf::Vector2f& mousePos) {
-    if (startButton.getGlobalBounds().contains(mousePos)) {
-        startGameTriggered = true;  // Устанавливаем флаг начала игры
+    if (!showAbout) {
+        if (startButton.getGlobalBounds().contains(mousePos)) {
+            startGameTriggered = true;
+        }
+        else if (aboutButton.getGlobalBounds().contains(mousePos)) {
+            showAbout = true;
+        }
+    }
+    else {
+        showAbout = false;
     }
 }
 
 void Menu::draw(sf::RenderWindow& window) {
-    window.draw(background); 
-    window.draw(title);       
-    window.draw(startButton); 
-    window.draw(aboutButton);
+    window.draw(background);
+    window.draw(title);
+
+    if (!showAbout) {
+        window.draw(startButton);
+        window.draw(aboutButton);
+    }
+    else {
+        window.draw(aboutBackground);
+        window.draw(aboutText);
+    }
 }
 
-// Проверка необходимости старта игры
 bool Menu::shouldStartGame() const {
     return startGameTriggered;
 }
 
-// Сброс состояния меню
 void Menu::reset() {
     startGameTriggered = false;
+    showAbout = false;
 }
