@@ -3,8 +3,7 @@
 #include "Player.h"
 #include <SFML/Graphics.hpp>
 
-class Level1
-{
+class Level1{
 public:
     Level1();
     ~Level1();
@@ -26,4 +25,12 @@ public:
 
     bool isGameOver;
     float gameOverLineY;
+
+private:
+    int currentWave;
+    int enemiesInWave;
+    float waveTimer;
+    bool isWaveActive;
+    float enemySpeedMultiplier;
+    sf::Sprite backgroundSprite;
 };

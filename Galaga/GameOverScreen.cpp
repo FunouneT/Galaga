@@ -7,9 +7,7 @@ GameOverScreen::GameOverScreen(sf::Font& font) :
     createElements();
 }
 
-void GameOverScreen::createElements()
-{
-    // Полупрозрачный оверлей
+void GameOverScreen::createElements(){
     overlay.setSize(sf::Vector2f(WINDOWWIDTH, WINDOWHEIGHT));
     overlay.setFillColor(sf::Color(0, 0, 0, 200));
 
@@ -48,8 +46,7 @@ void GameOverScreen::createElements()
     exitButton.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2 + 100);
 }
 
-void GameOverScreen::draw(sf::RenderWindow& window, int kills)
-{
+void GameOverScreen::draw(sf::RenderWindow& window, int kills){
     killsText.setString("Kills: " + std::to_string(kills));
     sf::FloatRect bounds = killsText.getLocalBounds();
     killsText.setOrigin(bounds.width / 2, bounds.height / 2);
@@ -62,8 +59,7 @@ void GameOverScreen::draw(sf::RenderWindow& window, int kills)
     window.draw(exitButton);
 }
 
-void GameOverScreen::handleEvent(const sf::Event& event, const sf::RenderWindow& window, sf::RenderWindow& gameWindow)
-{
+void GameOverScreen::handleEvent(const sf::Event& event, const sf::RenderWindow& window, sf::RenderWindow& gameWindow){
     if (event.type == sf::Event::MouseMoved) {
         sf::Vector2f mousePos = window.mapPixelToCoords({ event.mouseMove.x, event.mouseMove.y });
         checkHover(mousePos);
@@ -74,8 +70,7 @@ void GameOverScreen::handleEvent(const sf::Event& event, const sf::RenderWindow&
     }
 }
 
-void GameOverScreen::checkHover(const sf::Vector2f& mousePos)
-{
+void GameOverScreen::checkHover(const sf::Vector2f& mousePos){
     bool restartHover = restartButton.getGlobalBounds().contains(mousePos);
     bool exitHover = exitButton.getGlobalBounds().contains(mousePos);
 
@@ -96,12 +91,10 @@ void GameOverScreen::checkClick(const sf::Vector2f& mousePos, sf::RenderWindow& 
     }
 }
 
-bool GameOverScreen::shouldRestart() const
-{
+bool GameOverScreen::shouldRestart() const{
     return restartTriggered;
 }
 
-void GameOverScreen::reset()
-{
+void GameOverScreen::reset(){
     restartTriggered = false;
 }

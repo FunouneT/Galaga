@@ -1,4 +1,5 @@
 #include "Menu.h"
+#include "Textures.h"
 
 Menu::Menu(sf::Font& font) :
     font(font),
@@ -8,22 +9,15 @@ Menu::Menu(sf::Font& font) :
     createBackground();
     createTitle();
     createButtons();
-    createAboutText();
+    createAboutWindow(); // Переименовано
 }
 
 void Menu::createBackground() {
-    background.setPrimitiveType(sf::Quads);
-    background.resize(4);
-
-    background[0].position = { 0, 0 };
-    background[1].position = { WINDOWWIDTH, 0 };
-    background[2].position = { WINDOWWIDTH, WINDOWHEIGHT };
-    background[3].position = { 0, WINDOWHEIGHT };
-
-    background[0].color = sf::Color(0, 0, 139);
-    background[1].color = sf::Color(0, 0, 139);
-    background[2].color = sf::Color(128, 0, 128);
-    background[3].color = sf::Color(128, 0, 128);
+    backgroundSprite.setTexture(textures::backgroundMenu);
+    backgroundSprite.setScale(
+        static_cast<float>(WINDOWWIDTH) / backgroundSprite.getLocalBounds().width,
+        static_cast<float>(WINDOWHEIGHT) / backgroundSprite.getLocalBounds().height
+    );
 }
 
 void Menu::createTitle() {
@@ -58,13 +52,26 @@ void Menu::createButtons() {
     aboutButton.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2 + 50);
 }
 
-void Menu::createAboutText() {
-    aboutBackground.setSize(sf::Vector2f(600, 400));
-    aboutBackground.setFillColor(sf::Color(0, 0, 50, 220));
-    aboutBackground.setOutlineThickness(2);
-    aboutBackground.setOutlineColor(sf::Color::White);
-    aboutBackground.setOrigin(300, 200);
-    aboutBackground.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2);
+void Menu::createAboutWindow() {
+    const float windowWidth = 600.f;
+    const float windowHeight = 400.f;
+
+    const float windowX = (WINDOWWIDTH - windowWidth) / 2;
+    const float windowY = (WINDOWHEIGHT - windowHeight) / 2;
+
+    aboutWindow.setSize(sf::Vector2f(windowWidth, windowHeight));
+    aboutWindow.setFillColor(sf::Color(30, 30, 60, 240));
+    aboutWindow.setOutlineThickness(2);
+    aboutWindow.setOutlineColor(sf::Color::White);
+    aboutWindow.setPosition(windowX, windowY);
+
+    
+    aboutBackgroundSprite.setScale(
+        windowWidth / aboutBackgroundSprite.getLocalBounds().width,
+        windowHeight / aboutBackgroundSprite.getLocalBounds().height
+    );
+    aboutBackgroundSprite.setPosition(windowX, windowY);
+
 
     aboutText.setFont(font);
     aboutText.setString(
@@ -81,7 +88,7 @@ void Menu::createAboutText() {
 
     sf::FloatRect bounds = aboutText.getLocalBounds();
     aboutText.setOrigin(bounds.width / 2, bounds.height / 2);
-    aboutText.setPosition(WINDOWWIDTH / 2, WINDOWHEIGHT / 2);
+    aboutText.setPosition(windowX + windowWidth / 2, windowY + windowHeight / 2);
 }
 
 void Menu::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
@@ -99,22 +106,24 @@ void Menu::handleEvent(const sf::Event& event, const sf::RenderWindow& window) {
 }
 
 void Menu::checkHover(const sf::Vector2f& mousePos) {
-    if (startButton.getGlobalBounds().contains(mousePos)) {
-        startButton.setScale(1.1f, 1.1f);
-        startButton.setFillColor(sf::Color(200, 255, 200));
-    }
-    else {
-        startButton.setScale(1.0f, 1.0f);
-        startButton.setFillColor(sf::Color::White);
-    }
+    if (!showAbout) {
+        if (startButton.getGlobalBounds().contains(mousePos)) {
+            startButton.setScale(1.1f, 1.1f);
+            startButton.setFillColor(sf::Color(200, 255, 200));
+        }
+        else {
+            startButton.setScale(1.0f, 1.0f);
+            startButton.setFillColor(sf::Color::White);
+        }
 
-    if (aboutButton.getGlobalBounds().contains(mousePos)) {
-        aboutButton.setScale(1.1f, 1.1f);
-        aboutButton.setFillColor(sf::Color(200, 200, 255));
-    }
-    else {
-        aboutButton.setScale(1.0f, 1.0f);
-        aboutButton.setFillColor(sf::Color::White);
+        if (aboutButton.getGlobalBounds().contains(mousePos)) {
+            aboutButton.setScale(1.1f, 1.1f);
+            aboutButton.setFillColor(sf::Color(200, 200, 255));
+        }
+        else {
+            aboutButton.setScale(1.0f, 1.0f);
+            aboutButton.setFillColor(sf::Color::White);
+        }
     }
 }
 
@@ -133,15 +142,15 @@ void Menu::checkClick(const sf::Vector2f& mousePos) {
 }
 
 void Menu::draw(sf::RenderWindow& window) {
-    window.draw(background);
-    window.draw(title);
+    window.draw(backgroundSprite);
 
-    if (!showAbout) {
-        window.draw(startButton);
-        window.draw(aboutButton);
-    }
-    else {
-        window.draw(aboutBackground);
+    window.draw(title);
+    window.draw(startButton);
+    window.draw(aboutButton);
+
+    if (showAbout) {
+
+        window.draw(aboutWindow);
         window.draw(aboutText);
     }
 }

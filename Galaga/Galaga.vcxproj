@@ -139,6 +139,7 @@
     <ClCompile Include="PauseMenuScreen.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Projectile.cpp" />
+    <ClCompile Include="Textures.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
