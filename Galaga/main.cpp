@@ -5,7 +5,7 @@
 #include "GameOverScreen.h"
 #include "PauseMenuScreen.h"
 #include "Textures.h" // Добавлен новый заголовок
-#include <iostream>
+//#include <iostream>
 
 enum class GameState 
 {
@@ -29,10 +29,10 @@ int main()
     GameOverScreen gameOverScreen(fonts::font);
     PauseMenuScreen pauseMenuScreen(fonts::font);
 
-    sf::Text fpsIndicator;
-    fpsIndicator.setFont(fonts::font);
-    fpsIndicator.setCharacterSize(20);
-    fpsIndicator.setPosition(sf::Vector2f(WINDOWWIDTH - 50, 0));
+    //sf::Text fpsIndicator;
+    //fpsIndicator.setFont(fonts::font);
+    //fpsIndicator.setCharacterSize(20);
+    //fpsIndicator.setPosition(sf::Vector2f(WINDOWWIDTH - 50, 0));
 
     while (window.isOpen()) 
     {
@@ -43,7 +43,7 @@ int main()
             time = clock.getElapsedTime().asSeconds();
         }
 
-        fpsIndicator.setString(std::to_string(int(1 / time)));
+        //fpsIndicator.setString(std::to_string(int(1 / time)));
 
         sf::Event event;
         while (window.pollEvent(event)) 
@@ -121,7 +121,7 @@ int main()
             break;
         }
 
-        window.draw(fpsIndicator);
+        //window.draw(fpsIndicator);
         window.display();
     }
 

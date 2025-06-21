@@ -4,7 +4,7 @@
 #include "Textures.h"
 #include "Projectile.h"
 #include "Enemy.h"
-#include <iostream>
+//#include <iostream>
 
 Level1::Level1()
 {
@@ -80,7 +80,7 @@ void Level1::update(float time)
 
     if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) && (player->getPos().x >= 0))
         player->update((player->state == State::Sprint ? -PLAYERSPEED * 1.5 : -PLAYERSPEED), time);
-    if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (player->getPos().x <= WINDOWWIDTH - 70))
+    if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) && (player->getPos().x <= WINDOWWIDTH - 93))
         player->update((player->state == State::Sprint ? PLAYERSPEED * 1.5 : PLAYERSPEED), time);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
     {
