@@ -6,8 +6,6 @@ class Projectile : public Entity
 {
 private:
 
-	//float damage;
-
 public:
 
 	Projectile(sf::Texture&, sf::Vector2f);

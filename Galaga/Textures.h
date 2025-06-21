@@ -3,13 +3,11 @@
 #include <SFML/Graphics.hpp>
 
 namespace textures {
-    sf::Texture playerTexture;
-    sf::Texture projectileTexture;
-    sf::Texture enemyTexture;
+    extern sf::Texture playerTexture;
+    extern sf::Texture projectileTexture;
+    extern sf::Texture enemyTexture;
+    extern sf::Texture backgroundLevel1;
+    extern sf::Texture backgroundMenu;
 
-    static void setTextures() {
-        playerTexture.loadFromFile("./Assets/textures/player.png");
-        projectileTexture.loadFromFile("./Assets/textures/projectile.png");
-        enemyTexture.loadFromFile("./Assets/textures/enemy.png");
-    }
+    void setTextures();
 }

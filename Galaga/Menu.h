@@ -15,7 +15,7 @@ private:
     void createBackground();
     void createTitle();
     void createButtons();
-    void createAboutText();
+    void createAboutWindow();
     void checkHover(const sf::Vector2f& mousePos);
     void checkClick(const sf::Vector2f& mousePos);
 
@@ -23,9 +23,13 @@ private:
     sf::Text title;
     sf::Text startButton;
     sf::Text aboutButton;
+
+
     sf::Text aboutText;
-    sf::RectangleShape aboutBackground;
-    sf::VertexArray background;
+    sf::RectangleShape aboutWindow;
+    sf::Sprite aboutBackgroundSprite;
+
+    sf::Sprite backgroundSprite;
     bool startGameTriggered;
     bool showAbout;
 };
